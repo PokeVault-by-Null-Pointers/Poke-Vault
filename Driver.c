@@ -9,7 +9,7 @@
 #include "UI.h"
 
 int main(void){
-    CardArrayList catalog;
+    CardArrayList catalog = {0};
 
     if(!initializeDataFiles()){
         fprintf(stderr, "Error: could not create the data files.\n");

@@ -64,8 +64,13 @@ bool filterOwnedCard(const OwnedCard* card, FilterBounds bounds){
 }
 //returns a filtered int array for the indexes of matches
 int* changeFilter(const CardArrayList* library, int* searchResults, FilterBounds bounds, int matchCount, int* filteredCount){
-    Card currentCard;
-    int* filterResults = malloc(sizeof(int) * matchCount);
+    if (library == NULL || filteredCount == NULL || matchCount < 0) {
+        return NULL;
+    }
+    if (matchCount > 0 && searchResults == NULL) {
+        return NULL;
+    }
+    Card currentCard;    int* filterResults = malloc(sizeof(int) * matchCount);
     *filteredCount = 0;
     for(int i = 0; i < matchCount; i++){
         currentCard = library->cards[searchResults[i]]; //the index of the {searchResults[i]}'th card in library
@@ -79,6 +84,13 @@ int* changeFilter(const CardArrayList* library, int* searchResults, FilterBounds
     return filterResults;
 }
 int* changeOwnedCardFilter(const OwnedCardArrayList* library, int* searchResults, FilterBounds bounds, int matchCount, int* filteredCount){
+    if (library == NULL || filteredCount == NULL || matchCount < 0) {
+    return NULL;
+    }
+
+    if (matchCount > 0 && searchResults == NULL) {
+    return NULL;
+    }
     OwnedCard currentCard;
     int* filterResults = malloc(sizeof(int) * matchCount);
     *filteredCount = 0;
@@ -97,6 +109,9 @@ int* changeOwnedCardFilter(const OwnedCardArrayList* library, int* searchResults
 
 //linear search, returns an int array for the indexes of matches
 int* searchCards(const CardArrayList* library, const char* name, int* matchCount){
+    if (library == NULL || name == NULL || matchCount == NULL) {
+        return NULL;
+    }
     cardLibrary = library;
     Card* cards = library->cards; //library->cards   means   (*library).cards,   which means   library[0].cards
     *matchCount = 0; //same as matchCount[0] = 0.
@@ -119,6 +134,9 @@ int* searchCards(const CardArrayList* library, const char* name, int* matchCount
 }
 //linear search, returns an int array for the indexes of matches
 int* searchOwnedCards(const OwnedCardArrayList* library, const char* name, int* matchCount){
+    if (library == NULL || name == NULL || matchCount == NULL) {
+        return NULL;
+    }
     ownedCardLibrary = library;
     OwnedCard* cards = library->cards; //library->cards   means   (*library).cards,   which means   library[0].cards
     OwnedCard currentCard;
