@@ -60,6 +60,10 @@ static bool growOwnedCardList(OwnedCardArrayList* list){
 }
 
 bool loadCardCatalog(CardArrayList* list){
+    if(list == NULL){
+        return false;
+    }
+    
     FILE* file = fopen(CARDS_FILE, "r");
     char line[LINE_SIZE];
     char name[50];
