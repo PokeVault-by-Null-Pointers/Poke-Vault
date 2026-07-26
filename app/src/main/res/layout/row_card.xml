@@ -74,12 +74,17 @@
             android:textColor="@color/vault_dark"
             android:textSize="22sp" />
 
-        <TextView
-            android:id="@+id/cardQuantityText"
-            android:layout_width="38dp"
-            android:layout_height="wrap_content"
+        <EditText
+            android:id="@+id/cardQuantityInput"
+            android:layout_width="54dp"
+            android:layout_height="46dp"
+            android:background="@drawable/input_field"
             android:fontFamily="@font/poppins_semibold"
             android:gravity="center"
+            android:inputType="number"
+            android:maxLength="3"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
             android:text="0"
             android:textColor="@color/vault_dark"
             android:textSize="17sp" />

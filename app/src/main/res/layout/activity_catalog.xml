@@ -19,5 +19,8 @@
   <Button android:id="@+id/catalogFilterButton" style="@style/PokeVault.PrimaryButton" android:layout_width="match_parent" android:layout_height="46dp" android:layout_marginTop="12dp" android:text="Filters"/>
  </LinearLayout>
  <TextView style="@style/PokeVault.SectionTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:text="Available Cards"/>
- <ListView android:id="@+id/cardList" android:layout_width="match_parent" android:layout_height="0dp" android:layout_marginTop="12dp" android:layout_weight="1" android:clipToPadding="false" android:divider="@android:color/transparent" android:dividerHeight="12dp" android:paddingBottom="18dp"/>
+ <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_marginTop="12dp" android:layout_weight="1">
+  <ListView android:id="@+id/cardList" android:layout_width="match_parent" android:layout_height="match_parent" android:clipToPadding="false" android:divider="@android:color/transparent" android:dividerHeight="12dp" android:paddingBottom="18dp"/>
+  <TextView android:id="@+id/catalogEmptyText" style="@style/PokeVault.Body" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:text="No results found." android:visibility="gone"/>
+ </FrameLayout>
 </LinearLayout>

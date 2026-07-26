@@ -3,6 +3,7 @@ package com.pokevault.app;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.text.InputType;
+import android.text.method.DigitsKeyListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -45,9 +46,7 @@ public final class CardFilterDialog {
         setNumber(maximumHp, filters.getMaximumHp());
         fields.addView(maximumHp, matchWidth());
 
-        EditText cardNumber = new EditText(context);
-        cardNumber.setHint("Card number (example: 4)");
-        cardNumber.setSingleLine(true);
+        EditText cardNumber = numberField(context, "Card number (example: 4)");
         cardNumber.setText(filters.getCardNumber());
         fields.addView(cardNumber, matchWidth());
 
@@ -97,6 +96,7 @@ public final class CardFilterDialog {
         field.setHint(hint);
         field.setSingleLine(true);
         field.setInputType(InputType.TYPE_CLASS_NUMBER);
+        field.setKeyListener(DigitsKeyListener.getInstance("0123456789"));
         return field;
     }
 

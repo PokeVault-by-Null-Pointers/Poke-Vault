@@ -27,6 +27,7 @@ public class CatalogActivity extends Activity {
         setContentView(R.layout.activity_catalog);
         data = new PokeVaultData(this);
         cardList = findViewById(R.id.cardList);
+        cardList.setEmptyView(findViewById(R.id.catalogEmptyText));
         showFilteredCards();
 
         searchInput = findViewById(R.id.searchInput);

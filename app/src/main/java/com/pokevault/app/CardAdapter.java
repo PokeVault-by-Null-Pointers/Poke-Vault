@@ -4,6 +4,9 @@
 package com.pokevault.app;
 
 import android.content.Context;
+import android.text.Editable;
+import android.text.InputFilter;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -64,7 +68,7 @@ public class CardAdapter extends BaseAdapter {
         ImageView image = row.findViewById(R.id.cardImage);
         TextView name = row.findViewById(R.id.cardNameText);
         TextView information = row.findViewById(R.id.cardInfoText);
-        TextView quantity = row.findViewById(R.id.cardQuantityText);
+        EditText quantity = row.findViewById(R.id.cardQuantityInput);
         Spinner condition = row.findViewById(R.id.cardConditionSpinner);
         Button minus = row.findViewById(R.id.cardMinusButton);
         Button plus = row.findViewById(R.id.cardPlusButton);
@@ -92,7 +96,47 @@ public class CardAdapter extends BaseAdapter {
             }));
         }
 
-        minus.setEnabled(data.getQuantity(card, data.getCondition(card)) > 0);
+        int currentQuantity = data.getQuantity(card, data.getCondition(card));
+        minus.setEnabled(currentQuantity > 0);
+        plus.setEnabled(currentQuantity < PokeVaultData.MAX_CARD_QUANTITY);
+
+        Object previousWatcher = quantity.getTag();
+        if (previousWatcher instanceof TextWatcher) {
+            quantity.removeTextChangedListener((TextWatcher)previousWatcher);
+        }
+        quantity.setFilters(new InputFilter[] { new InputFilter.LengthFilter(3) });
+        TextWatcher quantityWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence text, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence text, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (editable.length() == 0) {
+                    return;
+                }
+                int requested = Integer.parseInt(editable.toString());
+                data.setQuantity(card, requested);
+                minus.setEnabled(requested > 0);
+                plus.setEnabled(requested < PokeVaultData.MAX_CARD_QUANTITY);
+            }
+        };
+        quantity.setTag(quantityWatcher);
+        quantity.addTextChangedListener(quantityWatcher);
+        quantity.setOnFocusChangeListener((view, hasFocus) -> {
+            if (hasFocus) {
+                return;
+            }
+            String entered = quantity.getText().toString();
+            data.setQuantity(card, entered.isEmpty() ? 0 : Integer.parseInt(entered));
+            if (vaultMode) {
+                changed();
+            }
+        });
         minus.setOnClickListener(view -> {
             data.removeCard(card);
             Toast.makeText(context, "Removed one " + card.getName() + ".",
@@ -100,6 +144,12 @@ public class CardAdapter extends BaseAdapter {
             changed();
         });
         plus.setOnClickListener(view -> {
+            if (data.getQuantity(card, data.getCondition(card))
+                    >= PokeVaultData.MAX_CARD_QUANTITY) {
+                Toast.makeText(context, "Card quantity is limited to 999.",
+                    Toast.LENGTH_SHORT).show();
+                return;
+            }
             data.addCard(card);
             Toast.makeText(context, "Added one " + card.getName() + ".",
                 Toast.LENGTH_SHORT).show();
@@ -117,7 +167,7 @@ public class CardAdapter extends BaseAdapter {
         return row;
     }
 
-    private void bindDetails(Card card, TextView information, TextView quantity) {
+    private void bindDetails(Card card, TextView information, EditText quantity) {
         String hp = card.getHp() > 0 ? card.getHp() + " HP" : "No HP";
         String details = card.getSetName() + " • #" + card.getNumber()
             + " • " + card.getType() + " • " + hp

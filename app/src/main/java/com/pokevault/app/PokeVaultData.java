@@ -16,6 +16,7 @@ import java.util.Locale;
 import java.util.Set;
 
 public class PokeVaultData {
+    public static final int MAX_CARD_QUANTITY = 999;
     private static final String FILE_NAME = "pokevault_data";
     private static final String USERS_KEY = "users";
     private static final String CURRENT_USER_KEY = "current_user";
@@ -167,7 +168,20 @@ public class PokeVaultData {
         CardCondition condition = effectiveCondition(card);
         String key = quantityKey(getCurrentUser().getUsername(), card, condition);
         int currentQuantity = preferences.getInt(key, 0);
-        preferences.edit().putInt(key, currentQuantity + 1).apply();
+        if (currentQuantity < MAX_CARD_QUANTITY) {
+            preferences.edit().putInt(key, currentQuantity + 1).apply();
+        }
+    }
+
+    public void setQuantity(Card card, int quantity) {
+        CardCondition condition = effectiveCondition(card);
+        String key = quantityKey(getCurrentUser().getUsername(), card, condition);
+        int safeQuantity = Math.max(0, Math.min(MAX_CARD_QUANTITY, quantity));
+        if (safeQuantity == 0) {
+            preferences.edit().remove(key).apply();
+        } else {
+            preferences.edit().putInt(key, safeQuantity).apply();
+        }
     }
 
     public void removeCard(Card card) {
@@ -275,7 +289,9 @@ public class PokeVaultData {
         if (!preferences.contains(oldKey)) {
             return;
         }
-        int oldQuantity = preferences.getInt(oldKey, 0);
+        int oldQuantity = Math.min(
+            MAX_CARD_QUANTITY, Math.max(0, preferences.getInt(oldKey, 0))
+        );
         CardCondition oldCondition = CardCondition.fromStoredValue(
             preferences.getString(
                 "condition_" + username + "_" + card.getName(),
@@ -285,7 +301,7 @@ public class PokeVaultData {
         String newKey = quantityKey(username, card, oldCondition);
         int existing = preferences.getInt(newKey, 0);
         preferences.edit()
-            .putInt(newKey, existing + oldQuantity)
+            .putInt(newKey, Math.min(MAX_CARD_QUANTITY, existing + oldQuantity))
             .remove(oldKey)
             .remove("condition_" + username + "_" + card.getName())
             .apply();

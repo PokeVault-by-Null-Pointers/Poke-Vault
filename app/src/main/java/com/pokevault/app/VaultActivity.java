@@ -42,6 +42,7 @@ public class VaultActivity extends Activity {
             + "   Value: " + String.format(Locale.US, "$%.2f", data.getVaultValue()));
 
         ListView list = findViewById(R.id.vaultList);
+        list.setEmptyView(findViewById(R.id.vaultEmptyText));
         list.setAdapter(new CardAdapter(this, cards, data, true, this::showVault));
     }
 }
