@@ -14,7 +14,8 @@
 #include "Card.h" //needs this to be used
 
 //initialize a new Card. Card is defined in Card.h
-Card card_init(const char* name, const char* set, double value, int8_t rarity, int8_t stage, int8_t type){
+Card card_init(const char* name, const char* set, double value, int8_t rarity,
+               int8_t stage, int8_t type, int hp, const char* cardNumber){
     Card card;
     copyString(card.name, name, 50);//defined in Misc.c
     copyString(card.set, set, 100);//defined in Misc.c
@@ -22,13 +23,16 @@ Card card_init(const char* name, const char* set, double value, int8_t rarity, i
     card.rarity = rarity;
     card.stage = stage;
     card.type = type;
+    card.hp = hp;
+    copyString(card.cardNumber, cardNumber, CARD_NUMBER_SIZE);
     card.owned = false;
 
     return card;
 }
 
 //initialize a new OwnedCard. OwnedCard is defined in Card.h
-OwnedCard OwnedCard_init(Card* card, const char* set, double purchasePrice, int8_t grade){
+OwnedCard OwnedCard_init(Card* card, const char* set, double purchasePrice,
+                         int8_t grade, int8_t condition){
     OwnedCard newCard;
 
     copyString(newCard.name, card->name, 50);//defined in Misc.c
@@ -42,8 +46,11 @@ OwnedCard OwnedCard_init(Card* card, const char* set, double purchasePrice, int8
     newCard.rarity = (*card).rarity;
     newCard.stage = (*card).stage;
     newCard.type = (*card).type;
+    newCard.hp = (*card).hp;
+    copyString(newCard.cardNumber, card->cardNumber, CARD_NUMBER_SIZE);
     newCard.purchasePrice = purchasePrice;
     newCard.grade = grade;
+    newCard.condition = condition;
 
     //set the generic card's owned field to true
     card->owned = true;

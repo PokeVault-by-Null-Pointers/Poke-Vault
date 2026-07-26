@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.Map;
 
 public class PokeVaultData {
     private static final String FILE_NAME = "pokevault_data";
@@ -29,6 +30,11 @@ public class PokeVaultData {
     }
 
     public boolean createUser(String username, String password) {
+        if (username == null || username.trim().isEmpty()
+                || password == null || password.isEmpty()) {
+            return false;
+        }
+        username = username.trim();
         Set<String> users = new HashSet<>(preferences.getStringSet(USERS_KEY, new HashSet<String>()));
         if (users.contains(username)) {
             return false;
@@ -54,6 +60,41 @@ public class PokeVaultData {
         preferences.edit().remove(CURRENT_USER_KEY).apply();
     }
 
+    public boolean deleteCurrentUser(String password) {
+        String username = getCurrentUser().getUsername();
+        if (username.isEmpty() || password == null
+                || !password.equals(preferences.getString(passwordKey(username), null))) {
+            return false;
+        }
+
+        Set<String> users = new HashSet<>(
+            preferences.getStringSet(USERS_KEY, new HashSet<String>())
+        );
+        users.remove(username);
+
+        SharedPreferences.Editor editor = preferences.edit()
+            .putStringSet(USERS_KEY, users)
+            .remove(passwordKey(username))
+            .remove(CURRENT_USER_KEY);
+
+        String[] userDataPrefixes = {
+            "quantity_v2_" + username + "_",
+            "condition_selection_" + username + "_",
+            "quantity_" + username + "_",
+            "condition_" + username + "_"
+        };
+        for (Map.Entry<String, ?> entry : preferences.getAll().entrySet()) {
+            for (String prefix : userDataPrefixes) {
+                if (entry.getKey().startsWith(prefix)) {
+                    editor.remove(entry.getKey());
+                    break;
+                }
+            }
+        }
+        editor.apply();
+        return true;
+    }
+
     public UserProfile getCurrentUser() {
         String username = preferences.getString(CURRENT_USER_KEY, "");
         return new UserProfile(username);
@@ -71,14 +112,16 @@ public class PokeVaultData {
                     continue;
                 }
                 String[] values = line.split(",", -1);
-                if (values.length >= 6) {
+                if (values.length >= 8) {
                     cards.add(new Card(
                         values[0].trim(),
                         values[1].trim(),
                         values[2].trim(),
                         Double.parseDouble(values[3].trim()),
                         values[4].trim(),
-                        values[5].trim()
+                        values[5].trim(),
+                        Integer.parseInt(values[6].trim()),
+                        values[7].trim()
                     ));
                 }
             }
@@ -90,10 +133,24 @@ public class PokeVaultData {
     }
 
     public List<Card> searchCards(String searchText) {
+        return filterCards(loadCards(), searchText, "All", null, null, "");
+    }
+
+    public List<Card> filterCards(List<Card> source, String searchText,
+                                  String type, Integer minimumHp,
+                                  Integer maximumHp, String cardNumber) {
         List<Card> matches = new ArrayList<>();
         String wanted = searchText.toLowerCase(Locale.US).trim();
-        for (Card card : loadCards()) {
-            if (card.getName().toLowerCase(Locale.US).contains(wanted)) {
+        String wantedNumber = cardNumber.trim();
+        for (Card card : source) {
+            boolean nameMatches = card.getName().toLowerCase(Locale.US).contains(wanted);
+            boolean typeMatches = type.equals("All") || card.getType().equals(type);
+            boolean minimumMatches = minimumHp == null || card.getHp() >= minimumHp;
+            boolean maximumMatches = maximumHp == null || card.getHp() <= maximumHp;
+            boolean numberMatches = wantedNumber.isEmpty()
+                || card.getNumber().equalsIgnoreCase(wantedNumber);
+            if (nameMatches && typeMatches && minimumMatches
+                    && maximumMatches && numberMatches) {
                 matches.add(card);
             }
         }
@@ -101,13 +158,15 @@ public class PokeVaultData {
     }
 
     public void addCard(Card card) {
-        String key = quantityKey(getCurrentUser().getUsername(), card.getName());
+        CardCondition condition = effectiveCondition(card);
+        String key = quantityKey(getCurrentUser().getUsername(), card, condition);
         int currentQuantity = preferences.getInt(key, 0);
         preferences.edit().putInt(key, currentQuantity + 1).apply();
     }
 
     public void removeCard(Card card) {
-        String key = quantityKey(getCurrentUser().getUsername(), card.getName());
+        CardCondition condition = effectiveCondition(card);
+        String key = quantityKey(getCurrentUser().getUsername(), card, condition);
         int currentQuantity = preferences.getInt(key, 0);
         if (currentQuantity <= 1) {
             preferences.edit().remove(key).apply();
@@ -118,29 +177,41 @@ public class PokeVaultData {
 
     public void removeAll(Card card) {
         preferences.edit().remove(
-            quantityKey(getCurrentUser().getUsername(), card.getName())
+            quantityKey(getCurrentUser().getUsername(), card, effectiveCondition(card))
         ).apply();
     }
 
     public int getQuantity(Card card) {
-        return preferences.getInt(
-            quantityKey(getCurrentUser().getUsername(), card.getName()), 0
-        );
+        migrateLegacyQuantity(card);
+        if (card.getCondition() != null) {
+            return quantityForCondition(card, card.getCondition());
+        }
+        int total = 0;
+        for (CardCondition condition : CardCondition.values()) {
+            total += quantityForCondition(card, condition);
+        }
+        return total;
     }
 
     public List<Card> getVaultCards() {
         List<Card> ownedCards = new ArrayList<>();
         for (Card card : loadCards()) {
-            if (getQuantity(card) > 0) {
-                ownedCards.add(card);
+            migrateLegacyQuantity(card);
+            for (CardCondition condition : CardCondition.values()) {
+                if (quantityForCondition(card, condition) > 0) {
+                    ownedCards.add(card.withCondition(condition));
+                }
             }
         }
         return ownedCards;
     }
 
     public CardCondition getCondition(Card card) {
+        if (card.getCondition() != null) {
+            return card.getCondition();
+        }
         String stored = preferences.getString(
-            conditionKey(getCurrentUser().getUsername(), card.getName()),
+            selectionKey(getCurrentUser().getUsername(), card),
             CardCondition.NEAR_MINT.name()
         );
         return CardCondition.fromStoredValue(stored);
@@ -148,7 +219,7 @@ public class PokeVaultData {
 
     public void setCondition(Card card, CardCondition condition) {
         preferences.edit().putString(
-            conditionKey(getCurrentUser().getUsername(), card.getName()),
+            selectionKey(getCurrentUser().getUsername(), card),
             condition.name()
         ).apply();
     }
@@ -177,11 +248,47 @@ public class PokeVaultData {
         return "password_" + username;
     }
 
-    private String quantityKey(String username, String cardName) {
-        return "quantity_" + username + "_" + cardName;
+    private CardCondition effectiveCondition(Card card) {
+        return card.getCondition() == null ? getCondition(card) : card.getCondition();
     }
 
-    private String conditionKey(String username, String cardName) {
-        return "condition_" + username + "_" + cardName;
+    private int quantityForCondition(Card card, CardCondition condition) {
+        return preferences.getInt(
+            quantityKey(getCurrentUser().getUsername(), card, condition), 0
+        );
+    }
+
+    private void migrateLegacyQuantity(Card card) {
+        String username = getCurrentUser().getUsername();
+        String oldKey = "quantity_" + username + "_" + card.getName();
+        if (!preferences.contains(oldKey)) {
+            return;
+        }
+        int oldQuantity = preferences.getInt(oldKey, 0);
+        CardCondition oldCondition = CardCondition.fromStoredValue(
+            preferences.getString(
+                "condition_" + username + "_" + card.getName(),
+                CardCondition.NEAR_MINT.name()
+            )
+        );
+        String newKey = quantityKey(username, card, oldCondition);
+        int existing = preferences.getInt(newKey, 0);
+        preferences.edit()
+            .putInt(newKey, existing + oldQuantity)
+            .remove(oldKey)
+            .remove("condition_" + username + "_" + card.getName())
+            .apply();
+    }
+
+    private String cardKey(Card card) {
+        return card.getSetName() + "_" + card.getNumber();
+    }
+
+    private String quantityKey(String username, Card card, CardCondition condition) {
+        return "quantity_v2_" + username + "_" + cardKey(card) + "_" + condition.name();
+    }
+
+    private String selectionKey(String username, Card card) {
+        return "condition_selection_" + username + "_" + cardKey(card);
     }
 }

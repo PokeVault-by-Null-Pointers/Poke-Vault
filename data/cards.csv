@@ -1,9 +1,9 @@
-# name,set,market_value,rarity,stage,type
-Charizard,Base Set,328.45,3,2,1
-Pikachu,Base Set,31.50,0,0,3
-Blastoise,Base Set,142.20,3,2,2
-Venusaur,Base Set,104.75,3,2,0
-Pikachu VMAX,Vivid Voltage,122.80,6,0,3
-Mew ex,Scarlet and Violet 151,18.62,4,0,5
-Umbreon VMAX,Evolving Skies,865.00,5,1,7
-Dragonite,Silver Tempest,4.18,2,2,9
+# name,set,market_value,rarity,stage,type,hp,card_number
+Charizard,Base Set,328.45,3,2,1,120,4/102
+Pikachu,Base Set,31.50,0,0,3,40,58/102
+Blastoise,Base Set,142.20,3,2,2,100,2/102
+Venusaur,Base Set,104.75,3,2,0,100,15/102
+Pikachu VMAX,Vivid Voltage,122.80,6,0,3,310,188/185
+Mew ex,Scarlet and Violet 151,18.62,4,0,5,180,151/165
+Umbreon VMAX,Evolving Skies,865.00,5,1,7,310,215/203
+Dragonite,Silver Tempest,4.18,2,2,9,160,131/195

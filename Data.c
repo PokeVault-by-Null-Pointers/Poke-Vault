@@ -68,6 +68,9 @@ bool loadCardCatalog(CardArrayList* list){
     int rarity;
     int stage;
     int type;
+    int hp;
+    char cardNumber[CARD_NUMBER_SIZE];
+    int fields;
 
     list->cards = NULL;
     list->size = 0;
@@ -81,9 +84,16 @@ bool loadCardCatalog(CardArrayList* list){
         if(line[0] == '#' || line[0] == '\n'){
             continue;
         }
-        if(sscanf(line, "%49[^,],%99[^,],%lf,%d,%d,%d",
-                  name, set, &value, &rarity, &stage, &type) != 6){
-            continue;
+        fields = sscanf(line, "%49[^,],%99[^,],%lf,%d,%d,%d,%d,%19[^\r\n]",
+                        name, set, &value, &rarity, &stage, &type,
+                        &hp, cardNumber);
+        if(fields != 8){
+            if(sscanf(line, "%49[^,],%99[^,],%lf,%d,%d,%d",
+                      name, set, &value, &rarity, &stage, &type) != 6){
+                continue;
+            }
+            hp = 0;
+            copyString(cardNumber, "Unknown", CARD_NUMBER_SIZE);
         }
         if(list->size == list->capacity && !growCardList(list)){
             fclose(file);
@@ -91,7 +101,8 @@ bool loadCardCatalog(CardArrayList* list){
             return false;
         }
         list->cards[list->size] = card_init(
-            name, set, value, (int8_t)rarity, (int8_t)stage, (int8_t)type
+            name, set, value, (int8_t)rarity, (int8_t)stage, (int8_t)type,
+            hp, cardNumber
         );
         list->size++;
     }
@@ -109,6 +120,8 @@ bool loadOwnedCards(const char* username, OwnedCardArrayList* list){
     int stage;
     int type;
     int grade;
+    int condition;
+    int fields;
 
     list->cards = NULL;
     list->size = 0;
@@ -119,10 +132,20 @@ bool loadOwnedCards(const char* username, OwnedCardArrayList* list){
     }
 
     while(fgets(line, sizeof(line), file) != NULL){
-        if(sscanf(line, "%31[^,],%49[^,],%99[^,],%lf,%d,%d,%d,%lf,%d",
-                  savedUsername, card.name, card.set, &card.value,
-                  &rarity, &stage, &type, &card.purchasePrice, &grade) != 9){
-            continue;
+        fields = sscanf(line,
+            "%31[^,],%49[^,],%99[^,],%lf,%d,%d,%d,%d,%19[^,],%lf,%d,%d",
+            savedUsername, card.name, card.set, &card.value,
+            &rarity, &stage, &type, &card.hp, card.cardNumber,
+            &card.purchasePrice, &grade, &condition);
+        if(fields != 12){
+            if(sscanf(line, "%31[^,],%49[^,],%99[^,],%lf,%d,%d,%d,%lf,%d",
+                      savedUsername, card.name, card.set, &card.value,
+                      &rarity, &stage, &type, &card.purchasePrice, &grade) != 9){
+                continue;
+            }
+            card.hp = 0;
+            copyString(card.cardNumber, "Unknown", CARD_NUMBER_SIZE);
+            condition = 0;
         }
         if(strcmp(savedUsername, username) != 0){
             continue;
@@ -136,6 +159,7 @@ bool loadOwnedCards(const char* username, OwnedCardArrayList* list){
         card.stage = (int8_t)stage;
         card.type = (int8_t)type;
         card.grade = (int8_t)grade;
+        card.condition = (int8_t)condition;
         list->cards[list->size] = card;
         list->size++;
     }
@@ -150,10 +174,11 @@ bool appendOwnedCard(const char* username, const OwnedCard* card){
         return false;
     }
 
-    fprintf(file, "%s,%s,%s,%.2f,%d,%d,%d,%.2f,%d\n",
+    fprintf(file, "%s,%s,%s,%.2f,%d,%d,%d,%d,%s,%.2f,%d,%d\n",
             username, card->name, card->set, card->value,
             card->rarity, card->stage, card->type,
-            card->purchasePrice, card->grade);
+            card->hp, card->cardNumber, card->purchasePrice,
+            card->grade, card->condition);
     fclose(file);
     return true;
 }

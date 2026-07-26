@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/background_premium" android:fillViewport="true">
  <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingStart="24dp" android:paddingEnd="24dp" android:paddingBottom="40dp">
-  <!-- Reliable top offset: avoids padding shorthand overriding paddingTop on some builds. -->
   <View android:layout_width="match_parent" android:layout_height="56dp" />
   <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
    <ImageButton android:id="@+id/profileBackButton" android:layout_width="46dp" android:layout_height="46dp" android:background="@drawable/circle_gold" android:padding="11dp" android:src="@drawable/ic_back" android:contentDescription="Back"/>
@@ -20,6 +19,11 @@
   <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:background="@drawable/card_surface" android:elevation="2dp" android:gravity="center_vertical" android:orientation="horizontal">
    <ImageView android:layout_width="46dp" android:layout_height="46dp" android:background="@drawable/circle_gold" android:padding="10dp" android:src="@drawable/ic_profile" android:contentDescription="Profile"/>
    <TextView style="@style/PokeVault.Body" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="14dp" android:layout_weight="1" android:text="Keep collecting to grow your vault."/>
+  </LinearLayout>
+  <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="18dp" android:background="@drawable/card_surface" android:elevation="2dp" android:orientation="vertical">
+   <TextView style="@style/PokeVault.SectionTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Account Management"/>
+   <TextView style="@style/PokeVault.Body" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="Deleting your account permanently removes your profile and vault."/>
+   <Button android:id="@+id/deleteAccountButton" style="@style/PokeVault.PrimaryButton" android:layout_width="match_parent" android:layout_height="46dp" android:layout_marginTop="14dp" android:text="Delete Account"/>
   </LinearLayout>
  </LinearLayout>
 </ScrollView>

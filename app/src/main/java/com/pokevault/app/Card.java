@@ -11,15 +11,27 @@ public class Card {
     private final double marketValue;
     private final String rarityName;
     private final String imageUrl;
+    private final int hp;
+    private final String type;
+    private final CardCondition condition;
 
     public Card(String number, String name, String setName, double marketValue,
-                String rarityName, String imageUrl) {
+                String rarityName, String imageUrl, int hp, String type) {
+        this(number, name, setName, marketValue, rarityName, imageUrl, hp, type, null);
+    }
+
+    private Card(String number, String name, String setName, double marketValue,
+                 String rarityName, String imageUrl, int hp, String type,
+                 CardCondition condition) {
         this.number = number;
         this.name = name;
         this.setName = setName;
         this.marketValue = marketValue;
         this.rarityName = rarityName;
         this.imageUrl = imageUrl;
+        this.hp = hp;
+        this.type = type;
+        this.condition = condition;
     }
 
     public String getNumber() {
@@ -44,5 +56,22 @@ public class Card {
 
     public String getImageUrl() {
         return imageUrl;
+    }
+
+    public int getHp() {
+        return hp;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public CardCondition getCondition() {
+        return condition;
+    }
+
+    public Card withCondition(CardCondition ownedCondition) {
+        return new Card(number, name, setName, marketValue, rarityName, imageUrl,
+            hp, type, ownedCondition);
     }
 }

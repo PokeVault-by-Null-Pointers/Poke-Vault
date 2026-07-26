@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <float.h>
+#include <limits.h>
 #include <termios.h>
 #include <unistd.h>
 #include "Card.h"
@@ -24,6 +26,11 @@ static const char* stageNames[] = {
 static const char* typeNames[] = {
     "Grass", "Fire", "Water", "Lightning", "Fighting", "Psychic",
     "Colorless", "Darkness", "Metal", "Dragon", "Fairy"
+};
+
+static const char* conditionNames[] = {
+    "Near Mint", "Lightly Played", "Moderately Played",
+    "Heavily Played", "Damaged"
 };
 
 static void printLine(void){
@@ -162,6 +169,26 @@ static double readMoney(const char* prompt){
     }
 }
 
+static int readOptionalInt(const char* prompt, int minimum, int maximum,
+                           int blankValue){
+    char input[INPUT_SIZE];
+    char* end;
+    long value;
+
+    while(true){
+        readText(prompt, input, sizeof(input));
+        if(input[0] == '\0'){
+            return blankValue;
+        }
+        value = strtol(input, &end, 10);
+        if(*end == '\0' && value >= minimum && value <= maximum){
+            return (int)value;
+        }
+        printf("Enter a number from %d to %d, or leave it blank.\n",
+               minimum, maximum);
+    }
+}
+
 static void waitForEnter(void){
     char input[INPUT_SIZE];
     readText("\nPress Enter to continue...", input, sizeof(input));
@@ -196,6 +223,10 @@ static const char* safeType(int value){
     return value >= 0 && value <= 10 ? typeNames[value] : "Unknown";
 }
 
+static const char* safeCondition(int value){
+    return value >= 0 && value <= 4 ? conditionNames[value] : "Unknown";
+}
+
 static void printCardRow(size_t number, const Card* card){
     printf("%2zu. %-22s | %-20s | $%8.2f\n",
            number, card->name, card->set, card->value);
@@ -203,14 +234,47 @@ static void printCardRow(size_t number, const Card* card){
            safeRarity(card->rarity),
            safeStage(card->stage),
            safeType(card->type));
+    printf("    HP %-4d | Card no. %s\n", card->hp, card->cardNumber);
 }
 
 static void printOwnedCardRow(size_t number, const OwnedCard* card){
     double change = card->value - card->purchasePrice;
-    printf("%2zu. %-22s | %-20s | Grade %d\n",
-           number, card->name, card->set, card->grade);
+    printf("%2zu. %-22s | %-20s | %s | Grade %d\n",
+           number, card->name, card->set, safeCondition(card->condition),
+           card->grade);
     printf("    Paid $%7.2f | Value $%7.2f | Change %+.2f\n",
            card->purchasePrice, card->value, change);
+    printf("    %-10s | HP %-4d | Card no. %s\n",
+           safeType(card->type), card->hp, card->cardNumber);
+}
+
+static FilterBounds readCardFilters(void){
+    FilterBounds bounds = {
+        .minPrice = 0.0, .maxPrice = DBL_MAX,
+        .minValue = 0.0, .maxValue = DBL_MAX,
+        .minRarity = 0, .maxRarity = MAX_RARITY,
+        .minGrade = 1, .maxGrade = 10,
+        .stage = -1, .type = -1,
+        .minHp = 0, .maxHp = INT_MAX,
+        .cardNumber = "",
+        .owned = false, .unowned = false
+    };
+    int typeChoice;
+
+    printf("Type:\n");
+    printf(" 0. Any\n");
+    for(int index = 0; index <= 10; index++){
+        printf("%2d. %s\n", index + 1, typeNames[index]);
+    }
+    typeChoice = readInt("Choose a type: ", 0, 11);
+    bounds.type = (int8_t)(typeChoice - 1);
+    bounds.minHp = readOptionalInt("Minimum HP (blank for any): ",
+                                   0, 1000, 0);
+    bounds.maxHp = readOptionalInt("Maximum HP (blank for any): ",
+                                   bounds.minHp, 1000, INT_MAX);
+    readText("Card number (example 4/102; blank for any): ",
+             bounds.cardNumber, sizeof(bounds.cardNumber));
+    return bounds;
 }
 
 static bool createAccountScreen(char* loggedInUser){
@@ -381,6 +445,38 @@ static void searchCatalogScreen(CardArrayList* catalog){
     waitForEnter();
 }
 
+static void filterCatalogScreen(CardArrayList* catalog){
+    FilterBounds bounds;
+    int allCount = 0;
+    int filteredCount = 0;
+    int* allResults;
+    int* filteredResults;
+
+    printHeader("FILTER CARD CATALOG");
+    if(catalog->size == 0){
+        printf("No cards were loaded from data/cards.csv.\n");
+        waitForEnter();
+        return;
+    }
+
+    bounds = readCardFilters();
+    allResults = searchCards(catalog, "", &allCount);
+    filteredResults = changeFilter(
+        catalog, allResults, bounds, allCount, &filteredCount
+    );
+    free(allResults);
+
+    printf("\n%d matching card%s found.\n\n",
+           filteredCount, filteredCount == 1 ? "" : "s");
+    for(int index = 0; index < filteredCount; index++){
+        printCardRow((size_t)filteredResults[index] + 1,
+                     &catalog->cards[filteredResults[index]]);
+        printf("\n");
+    }
+    free(filteredResults);
+    waitForEnter();
+}
+
 static void vaultScreen(const char* username){
     OwnedCardArrayList list;
     int matchCount = 0;
@@ -448,6 +544,47 @@ static void vaultScreen(const char* username){
     waitForEnter();
 }
 
+static void filterVaultScreen(const char* username){
+    OwnedCardArrayList list;
+    FilterBounds bounds;
+    int allCount = 0;
+    int filteredCount = 0;
+    int* allResults;
+    int* filteredResults;
+
+    printHeader("FILTER MY VAULT");
+    if(!loadOwnedCards(username, &list)){
+        printf("Could not load your collection.\n");
+        waitForEnter();
+        return;
+    }
+    if(list.size == 0){
+        printf("Your vault is empty.\n");
+        freeOwnedCardList(&list);
+        waitForEnter();
+        return;
+    }
+
+    bounds = readCardFilters();
+    allResults = searchOwnedCards(&list, "", &allCount);
+    filteredResults = changeOwnedCardFilter(
+        &list, allResults, bounds, allCount, &filteredCount
+    );
+    free(allResults);
+
+    printf("\n%d matching owned card%s found.\n\n",
+           filteredCount, filteredCount == 1 ? "" : "s");
+    for(int index = 0; index < filteredCount; index++){
+        printOwnedCardRow((size_t)filteredResults[index] + 1,
+                          &list.cards[filteredResults[index]]);
+        printf("\n");
+    }
+
+    free(filteredResults);
+    freeOwnedCardList(&list);
+    waitForEnter();
+}
+
 static void searchVaultScreen(const char* username){
     OwnedCardArrayList list;
     char searchText[INPUT_SIZE];
@@ -491,6 +628,7 @@ static void addCardScreen(const char* username, CardArrayList* catalog){
     int choice;
     double purchasePrice;
     int grade;
+    int condition;
     OwnedCard newCard;
 
     printHeader("ADD CARD TO VAULT");
@@ -513,9 +651,15 @@ static void addCardScreen(const char* username, CardArrayList* catalog){
     }
     purchasePrice = readMoney("Purchase price: $");
     grade = readInt("Grade (1-10): ", 1, 10);
+    printf("\nCondition:\n");
+    for(int index = 0; index <= 4; index++){
+        printf("%d. %s\n", index + 1, conditionNames[index]);
+    }
+    condition = readInt("Choose the card's condition: ", 1, 5) - 1;
 
     newCard = OwnedCard_init(
-        &catalog->cards[choice - 1], "", purchasePrice, (int8_t)grade
+        &catalog->cards[choice - 1], "", purchasePrice, (int8_t)grade,
+        (int8_t)condition
     );
 
     if(appendOwnedCard(username, &newCard)){
@@ -589,23 +733,27 @@ static bool mainMenu(const char* username, CardArrayList* catalog){
     printf("Logged in as: %s\n\n", username);
     printf("1. Browse card catalog\n");
     printf("2. Search cards\n");
-    printf("3. View my vault\n");
-    printf("4. Search my vault\n");
-    printf("5. Add a card\n");
-    printf("6. Remove a card\n");
-    printf("7. View profile\n");
-    printf("8. Log out\n\n");
+    printf("3. Filter card catalog\n");
+    printf("4. View my vault\n");
+    printf("5. Search my vault\n");
+    printf("6. Filter my vault\n");
+    printf("7. Add a card\n");
+    printf("8. Remove a card\n");
+    printf("9. View profile\n");
+    printf("10. Log out\n\n");
 
-    choice = readInt("Choose an option: ", 1, 8);
+    choice = readInt("Choose an option: ", 1, 10);
     switch(choice){
         case 1: browseCatalogScreen(catalog); break;
         case 2: searchCatalogScreen(catalog); break;
-        case 3: vaultScreen(username); break;
-        case 4: searchVaultScreen(username); break;
-        case 5: addCardScreen(username, catalog); break;
-        case 6: removeCardScreen(username); break;
-        case 7: profileScreen(username); break;
-        case 8: return false;
+        case 3: filterCatalogScreen(catalog); break;
+        case 4: vaultScreen(username); break;
+        case 5: searchVaultScreen(username); break;
+        case 6: filterVaultScreen(username); break;
+        case 7: addCardScreen(username, catalog); break;
+        case 8: removeCardScreen(username); break;
+        case 9: profileScreen(username); break;
+        case 10: return false;
     }
     return true;
 }

@@ -39,12 +39,29 @@ public class CreateProfileActivity extends Activity {
         String password = passwordInput.getText().toString();
         String confirmation = confirmInput.getText().toString();
 
-        if (username.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Enter a username and password.", Toast.LENGTH_SHORT).show();
+        if (username.isEmpty()) {
+            usernameInput.setError("Create a username to save your profile.");
+            usernameInput.requestFocus();
+            return;
+        }
+        if (password.isEmpty()) {
+            passwordInput.setError("Create a password for your account.");
+            passwordInput.requestFocus();
+            return;
+        }
+        if (password.length() < 4) {
+            passwordInput.setError("Password must be at least 4 characters.");
+            passwordInput.requestFocus();
+            return;
+        }
+        if (confirmation.isEmpty()) {
+            confirmInput.setError("Enter your password again.");
+            confirmInput.requestFocus();
             return;
         }
         if (!password.equals(confirmation)) {
-            Toast.makeText(this, "The passwords do not match.", Toast.LENGTH_SHORT).show();
+            confirmInput.setError("The passwords do not match.");
+            confirmInput.requestFocus();
             return;
         }
         if (!new PokeVaultData(this).createUser(username, password)) {

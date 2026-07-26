@@ -28,6 +28,9 @@ typedef struct {
     int8_t minGrade;  int8_t maxGrade;
     int8_t stage;
     int8_t type;
+    int minHp;
+    int maxHp;
+    char cardNumber[CARD_NUMBER_SIZE];
     bool owned;
     bool unowned;
 } FilterBounds;

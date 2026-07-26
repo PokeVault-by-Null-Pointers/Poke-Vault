@@ -81,13 +81,16 @@ public class CardAdapter extends BaseAdapter {
         condition.setOnItemSelectedListener(null);
         condition.setAdapter(conditionAdapter);
         condition.setSelection(conditions.indexOf(data.getCondition(card)), false);
-        condition.setOnItemSelectedListener(new SimpleItemSelectedListener(selectedPosition -> {
-            CardCondition selected = conditions.get(selectedPosition);
-            if (selected != data.getCondition(card)) {
-                data.setCondition(card, selected);
-                changed();
-            }
-        }));
+        condition.setEnabled(!vaultMode);
+        if (!vaultMode) {
+            condition.setOnItemSelectedListener(new SimpleItemSelectedListener(selectedPosition -> {
+                CardCondition selected = conditions.get(selectedPosition);
+                if (selected != data.getCondition(card)) {
+                    data.setCondition(card, selected);
+                    notifyDataSetChanged();
+                }
+            }));
+        }
 
         minus.setEnabled(data.getQuantity(card) > 0);
         minus.setOnClickListener(view -> {
@@ -115,8 +118,11 @@ public class CardAdapter extends BaseAdapter {
     }
 
     private void bindDetails(Card card, TextView information, TextView quantity) {
-        String details = "Base Set • " + card.getNumber() + "/102 • " + card.getRarityName()
-            + "\n" + data.getCondition(card).getDisplayName() + " value: "
+        String hp = card.getHp() > 0 ? card.getHp() + " HP" : "No HP";
+        String details = card.getSetName() + " • #" + card.getNumber()
+            + " • " + card.getType() + " • " + hp
+            + "\n" + card.getRarityName() + " • "
+            + data.getCondition(card).getDisplayName() + " value: "
             + String.format(Locale.US, "$%.2f", data.getAdjustedValue(card));
         information.setText(details);
         quantity.setText(String.valueOf(data.getQuantity(card)));

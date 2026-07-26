@@ -33,6 +33,13 @@ bool filterCard(const Card* card, FilterBounds bounds){
     if (bounds.type != -1 && card->type != bounds.type){
         return false;
     }
+    if (card->hp < bounds.minHp || card->hp > bounds.maxHp){
+        return false;
+    }
+    if (bounds.cardNumber[0] != '\0' &&
+        strcmp(card->cardNumber, bounds.cardNumber) != 0){
+        return false;
+    }
     if (bounds.owned && !(card->owned)){
         return false;
     }
@@ -58,6 +65,13 @@ bool filterOwnedCard(const OwnedCard* card, FilterBounds bounds){
         return false;
     }
     if (bounds.type != -1 && card->type != bounds.type){
+        return false;
+    }
+    if (card->hp < bounds.minHp || card->hp > bounds.maxHp){
+        return false;
+    }
+    if (bounds.cardNumber[0] != '\0' &&
+        strcmp(card->cardNumber, bounds.cardNumber) != 0){
         return false;
     }
     return true;

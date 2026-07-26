@@ -65,3 +65,8 @@ The C version still compiles separately:
 
 Its CSV files are in the top-level `data` folder. The Android app has its own
 copy of the catalog in `app/src/main/res/raw/cards.csv`.
+
+The C catalog stores each card's HP and collector number. Each card added to a
+user's vault is saved as its own row, including that copy's condition, so
+duplicates with different conditions remain separate. The C home menu also
+provides catalog and vault filters for type, HP range, and card number.
