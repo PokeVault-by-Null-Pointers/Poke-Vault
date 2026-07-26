@@ -66,8 +66,16 @@ public final class CardFilterDialog {
                 onChanged.run();
             });
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
-                Integer minimum = parseNumber(minimumHp);
-                Integer maximum = parseNumber(maximumHp);
+                Integer minimum;
+                Integer maximum;
+                try {
+                    minimum = parseNumber(minimumHp);
+                    maximum = parseNumber(maximumHp);
+                } catch (NumberFormatException ignoredNumber) {
+                    Toast.makeText(context, "HP must be a valid whole number.",
+                        Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 if (minimum != null && maximum != null && minimum > maximum) {
                     Toast.makeText(context, "Minimum HP cannot exceed maximum HP.",
                         Toast.LENGTH_SHORT).show();

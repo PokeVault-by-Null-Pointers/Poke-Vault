@@ -92,7 +92,7 @@ public class CardAdapter extends BaseAdapter {
             }));
         }
 
-        minus.setEnabled(data.getQuantity(card) > 0);
+        minus.setEnabled(data.getQuantity(card, data.getCondition(card)) > 0);
         minus.setOnClickListener(view -> {
             data.removeCard(card);
             Toast.makeText(context, "Removed one " + card.getName() + ".",
@@ -125,7 +125,9 @@ public class CardAdapter extends BaseAdapter {
             + data.getCondition(card).getDisplayName() + " value: "
             + String.format(Locale.US, "$%.2f", data.getAdjustedValue(card));
         information.setText(details);
-        quantity.setText(String.valueOf(data.getQuantity(card)));
+        quantity.setText(String.valueOf(
+            data.getQuantity(card, data.getCondition(card))
+        ));
     }
 
     private void changed() {

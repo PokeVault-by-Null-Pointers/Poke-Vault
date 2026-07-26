@@ -14,7 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.Map;
 
 public class PokeVaultData {
     private static final String FILE_NAME = "pokevault_data";
@@ -40,19 +39,31 @@ public class PokeVaultData {
             return false;
         }
         users.add(username);
+        String passwordHash = PasswordStorage.hash(password);
+        if (passwordHash == null) {
+            return false;
+        }
         preferences.edit()
             .putStringSet(USERS_KEY, users)
-            .putString(passwordKey(username), password)
+            .putString(passwordKey(username), passwordHash)
             .apply();
         return true;
     }
 
     public boolean login(String username, String password) {
         String savedPassword = preferences.getString(passwordKey(username), null);
-        if (savedPassword == null || !savedPassword.equals(password)) {
+        if (!PasswordStorage.verify(password, savedPassword)) {
             return false;
         }
-        preferences.edit().putString(CURRENT_USER_KEY, username).apply();
+        SharedPreferences.Editor editor = preferences.edit()
+            .putString(CURRENT_USER_KEY, username);
+        if (PasswordStorage.needsUpgrade(savedPassword)) {
+            String upgraded = PasswordStorage.hash(password);
+            if (upgraded != null) {
+                editor.putString(passwordKey(username), upgraded);
+            }
+        }
+        editor.apply();
         return true;
     }
 
@@ -63,7 +74,8 @@ public class PokeVaultData {
     public boolean deleteCurrentUser(String password) {
         String username = getCurrentUser().getUsername();
         if (username.isEmpty() || password == null
-                || !password.equals(preferences.getString(passwordKey(username), null))) {
+                || !PasswordStorage.verify(password,
+                    preferences.getString(passwordKey(username), null))) {
             return false;
         }
 
@@ -77,18 +89,12 @@ public class PokeVaultData {
             .remove(passwordKey(username))
             .remove(CURRENT_USER_KEY);
 
-        String[] userDataPrefixes = {
-            "quantity_v2_" + username + "_",
-            "condition_selection_" + username + "_",
-            "quantity_" + username + "_",
-            "condition_" + username + "_"
-        };
-        for (Map.Entry<String, ?> entry : preferences.getAll().entrySet()) {
-            for (String prefix : userDataPrefixes) {
-                if (entry.getKey().startsWith(prefix)) {
-                    editor.remove(entry.getKey());
-                    break;
-                }
+        for (Card card : loadCards()) {
+            editor.remove(selectionKey(username, card));
+            editor.remove("quantity_" + username + "_" + card.getName());
+            editor.remove("condition_" + username + "_" + card.getName());
+            for (CardCondition condition : CardCondition.values()) {
+                editor.remove(quantityKey(username, card, condition));
             }
         }
         editor.apply();
@@ -184,13 +190,18 @@ public class PokeVaultData {
     public int getQuantity(Card card) {
         migrateLegacyQuantity(card);
         if (card.getCondition() != null) {
-            return quantityForCondition(card, card.getCondition());
+            return getQuantity(card, card.getCondition());
         }
         int total = 0;
         for (CardCondition condition : CardCondition.values()) {
             total += quantityForCondition(card, condition);
         }
         return total;
+    }
+
+    public int getQuantity(Card card, CardCondition condition) {
+        migrateLegacyQuantity(card);
+        return quantityForCondition(card, condition);
     }
 
     public List<Card> getVaultCards() {
