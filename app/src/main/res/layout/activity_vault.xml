@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/background_premium" android:orientation="vertical" android:paddingStart="22dp" android:paddingTop="96dp" android:paddingEnd="22dp" android:paddingBottom="16dp">
+ <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+  <ImageButton android:id="@+id/vaultBackButton" android:layout_width="46dp" android:layout_height="46dp" android:background="@drawable/circle_gold" android:padding="11dp" android:src="@drawable/ic_back" android:contentDescription="Back"/>
+  <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="14dp" android:layout_weight="1" android:orientation="vertical">
+   <TextView style="@style/PokeVault.PageTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="My Vault"/>
+   <TextView style="@style/PokeVault.Body" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Your saved collection, beautifully organized."/>
+  </LinearLayout>
+  <ImageView android:layout_width="48dp" android:layout_height="48dp" android:src="@drawable/logo_pokevault" android:contentDescription="PokéVault"/>
+ </LinearLayout>
+ <View android:layout_width="64dp" android:layout_height="5dp" android:layout_marginStart="60dp" android:layout_marginTop="20dp" android:background="@drawable/divider_gold"/>
+ <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="30dp" android:background="@drawable/card_surface" android:elevation="5dp" android:gravity="center_vertical" android:orientation="horizontal">
+  <ImageView android:layout_width="48dp" android:layout_height="48dp" android:background="@drawable/circle_gold" android:padding="10dp" android:src="@drawable/ic_vault" android:contentDescription="Vault summary"/>
+  <TextView android:id="@+id/vaultTotalText" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="14dp" android:layout_weight="1" android:fontFamily="@font/poppins_semibold" android:text="Cards: 0   Value: $0.00" android:textColor="@color/vault_dark" android:textSize="18sp"/>
+ </LinearLayout>
+ <Button android:id="@+id/vaultFilterButton" style="@style/PokeVault.PrimaryButton" android:layout_width="match_parent" android:layout_height="46dp" android:layout_marginTop="12dp" android:text="Filters"/>
+ <TextView style="@style/PokeVault.SectionTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:text="Saved Cards"/>
+ <ListView android:id="@+id/vaultList" android:layout_width="match_parent" android:layout_height="0dp" android:layout_marginTop="12dp" android:layout_weight="1" android:clipToPadding="false" android:divider="@android:color/transparent" android:dividerHeight="12dp" android:paddingBottom="18dp"/>
+</LinearLayout>

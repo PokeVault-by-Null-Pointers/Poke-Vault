@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/card_surface"
+    android:elevation="4dp"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/cardImage"
+            android:layout_width="78dp"
+            android:layout_height="110dp"
+            android:background="@drawable/input_field"
+            android:contentDescription="Card image"
+            android:padding="7dp"
+            android:scaleType="fitCenter" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/cardNameText"
+                style="@style/PokeVault.SectionTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/cardInfoText"
+                style="@style/PokeVault.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:lineSpacingExtra="2dp" />
+
+            <Spinner
+                android:id="@+id/cardConditionSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/condition_field"
+                android:paddingStart="12dp"
+                android:paddingEnd="8dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/cardMinusButton"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:background="@drawable/circle_navy"
+            android:backgroundTint="@null"
+            android:fontFamily="@font/poppins_semibold"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
+            android:text="−"
+            android:textAllCaps="false"
+            android:textColor="@color/vault_dark"
+            android:textSize="22sp" />
+
+        <TextView
+            android:id="@+id/cardQuantityText"
+            android:layout_width="38dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_semibold"
+            android:gravity="center"
+            android:text="0"
+            android:textColor="@color/vault_dark"
+            android:textSize="17sp" />
+
+        <Button
+            android:id="@+id/cardPlusButton"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:background="@drawable/circle_gold"
+            android:backgroundTint="@null"
+            android:fontFamily="@font/poppins_semibold"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
+            android:text="+"
+            android:textAllCaps="false"
+            android:textColor="@color/vault_dark"
+            android:textSize="20sp" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/cardActionButton"
+            style="@style/PokeVault.PrimaryButton"
+            android:layout_width="112dp"
+            android:layout_height="46dp"
+            android:layout_marginStart="10dp"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:text="Remove Card"
+            android:textSize="11sp" />
+    </LinearLayout>
+</LinearLayout>

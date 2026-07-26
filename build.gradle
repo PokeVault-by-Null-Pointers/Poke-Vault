@@ -1,0 +1,4 @@
+// Makes the Android application build tools available to the app module.
+plugins {
+    id "com.android.application" version "9.1.0" apply false
+}

@@ -14,7 +14,7 @@
 
 //better strncpy
 void copyString(char* output, const char* input, int size){
-    if(size <= 0 || strlen(output) == 0){
+    if(output == NULL || input == NULL || size <= 0){
         return;
     }
     int i = 0;

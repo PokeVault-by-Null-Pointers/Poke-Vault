@@ -33,6 +33,13 @@ bool filterCard(const Card* card, FilterBounds bounds){
     if (bounds.type != -1 && card->type != bounds.type){
         return false;
     }
+    if (card->hp < bounds.minHp || card->hp > bounds.maxHp){
+        return false;
+    }
+    if (bounds.cardNumber[0] != '\0' &&
+        strcmp(card->cardNumber, bounds.cardNumber) != 0){
+        return false;
+    }
     if (bounds.owned && !(card->owned)){
         return false;
     }
@@ -60,11 +67,17 @@ bool filterOwnedCard(const OwnedCard* card, FilterBounds bounds){
     if (bounds.type != -1 && card->type != bounds.type){
         return false;
     }
+    if (card->hp < bounds.minHp || card->hp > bounds.maxHp){
+        return false;
+    }
+    if (bounds.cardNumber[0] != '\0' &&
+        strcmp(card->cardNumber, bounds.cardNumber) != 0){
+        return false;
+    }
     return true;
 }
 //returns a filtered int array for the indexes of matches
 int* changeFilter(const CardArrayList* library, int* searchResults, FilterBounds bounds, int matchCount, int* filteredCount){
-    Card* cards = library->cards;
     Card currentCard;
     int* filterResults = malloc(sizeof(int) * matchCount);
     *filteredCount = 0;
@@ -80,7 +93,6 @@ int* changeFilter(const CardArrayList* library, int* searchResults, FilterBounds
     return filterResults;
 }
 int* changeOwnedCardFilter(const OwnedCardArrayList* library, int* searchResults, FilterBounds bounds, int matchCount, int* filteredCount){
-    OwnedCard* cards = library->cards;
     OwnedCard currentCard;
     int* filterResults = malloc(sizeof(int) * matchCount);
     *filteredCount = 0;

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/background_premium" android:fillViewport="true">
+ <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingStart="24dp" android:paddingEnd="24dp" android:paddingBottom="44dp">
+  <!-- Reliable top offset: avoids padding shorthand overriding paddingTop on some builds. -->
+  <View android:layout_width="match_parent" android:layout_height="56dp" />
+  <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+   <ImageView android:layout_width="56dp" android:layout_height="56dp" android:src="@drawable/logo_pokevault" android:contentDescription="PokéVault"/>
+   <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="14dp" android:layout_weight="1" android:orientation="vertical">
+    <TextView android:id="@+id/welcomeText" style="@style/PokeVault.PageTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Welcome back"/>
+    <TextView style="@style/PokeVault.Body" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Manage your personal Pokémon collection."/>
+   </LinearLayout>
+  </LinearLayout>
+  <View android:layout_width="64dp" android:layout_height="5dp" android:layout_marginTop="20dp" android:background="@drawable/divider_gold"/>
+  <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="32dp" android:background="@drawable/card_surface" android:elevation="5dp" android:orientation="vertical">
+   <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+    <ImageView android:layout_width="42dp" android:layout_height="42dp" android:background="@drawable/circle_gold" android:padding="9dp" android:src="@drawable/ic_vault" android:contentDescription="Collection"/>
+    <TextView style="@style/PokeVault.SectionTitle" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:layout_weight="1" android:text="Collection Overview"/>
+   </LinearLayout>
+   <TextView style="@style/PokeVault.Body" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="A quick look at your vault"/>
+   <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginTop="18dp" android:background="@color/divider"/>
+   <TextView android:id="@+id/summaryText" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="18dp" android:fontFamily="@font/nunito_sans_regular" android:lineSpacingExtra="8dp" android:text="Cards owned: 0&#10;Vault value: $0.00" android:textColor="@color/text_primary" android:textSize="18sp"/>
+   <Button android:id="@+id/catalogButton" style="@style/PokeVault.PrimaryButton" android:layout_width="match_parent" android:layout_height="52dp" android:layout_marginTop="22dp" android:text="Browse Cards"/>
+  </LinearLayout>
+  <TextView style="@style/PokeVault.SectionTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="30dp" android:text="Quick Access"/>
+  <TextView style="@style/PokeVault.Body" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="Jump back into your collection"/>
+  <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:background="@drawable/card_surface" android:elevation="3dp" android:gravity="center_vertical" android:orientation="horizontal">
+   <ImageView android:layout_width="46dp" android:layout_height="46dp" android:background="@drawable/circle_gold" android:padding="10dp" android:src="@drawable/ic_vault" android:contentDescription="Vault"/>
+   <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="14dp" android:layout_weight="1" android:orientation="vertical">
+    <TextView style="@style/PokeVault.SectionTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="My Vault" android:textSize="17sp"/>
+    <TextView style="@style/PokeVault.Body" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="View saved cards and total value."/>
+   </LinearLayout>
+   <Button android:id="@+id/vaultButton" style="@style/PokeVault.SecondaryButton" android:layout_width="92dp" android:layout_height="46dp" android:text="Open"/>
+  </LinearLayout>
+  <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:background="@drawable/card_surface" android:elevation="3dp" android:gravity="center_vertical" android:orientation="horizontal">
+   <ImageView android:layout_width="46dp" android:layout_height="46dp" android:background="@drawable/circle_gold" android:padding="10dp" android:src="@drawable/ic_profile" android:contentDescription="Profile"/>
+   <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="14dp" android:layout_weight="1" android:orientation="vertical">
+    <TextView style="@style/PokeVault.SectionTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Trainer Profile" android:textSize="17sp"/>
+    <TextView style="@style/PokeVault.Body" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Review your collector information."/>
+   </LinearLayout>
+   <Button android:id="@+id/profileButton" style="@style/PokeVault.SecondaryButton" android:layout_width="92dp" android:layout_height="46dp" android:text="View"/>
+  </LinearLayout>
+  <Button android:id="@+id/logoutButton" android:layout_width="wrap_content" android:layout_height="48dp" android:layout_gravity="center_horizontal" android:layout_marginTop="26dp" android:background="@android:color/transparent" android:drawableStart="@drawable/ic_logout" android:drawablePadding="8dp" android:fontFamily="@font/nunito_sans_regular" android:text="Log Out" android:textAllCaps="false" android:textColor="@color/vault_red"/>
+ </LinearLayout>
+</ScrollView>

@@ -1,0 +1,17 @@
+// Builds the Android application module found in the app folder.
+plugins {
+    id "com.android.application"
+}
+
+android {
+    namespace "com.pokevault.app"
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.pokevault.app"
+        minSdk 24
+        targetSdk 35
+        versionCode 1
+        versionName "1.0"
+    }
+}

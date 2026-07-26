@@ -1,0 +1,9 @@
+/pokevault
+prog
+data/*.tmp
+.DS_Store
+.gradle/
+.idea/
+local.properties
+app/build/
+build/
