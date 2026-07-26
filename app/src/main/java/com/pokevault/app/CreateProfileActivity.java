@@ -38,30 +38,24 @@ public class CreateProfileActivity extends Activity {
         String username = usernameInput.getText().toString().trim();
         String password = passwordInput.getText().toString();
         String confirmation = confirmInput.getText().toString();
+        boolean meetsLengthRequirement = (password.length() >= 8);
+        boolean meetsCharacterRequirement = password.matches(".*[^a-zA-Z0-9].*");
 
-        if (username.isEmpty()) {
-            usernameInput.setError("Create a username to save your profile.");
-            usernameInput.requestFocus();
-            return;
-        }
-        if (password.isEmpty()) {
-            passwordInput.setError("Create a password for your account.");
-            passwordInput.requestFocus();
-            return;
-        }
-        if (password.length() < 4) {
-            passwordInput.setError("Password must be at least 4 characters.");
-            passwordInput.requestFocus();
-            return;
-        }
-        if (confirmation.isEmpty()) {
-            confirmInput.setError("Enter your password again.");
-            confirmInput.requestFocus();
+
+        if (username.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Enter a username and password.", Toast.LENGTH_SHORT).show();
             return;
         }
         if (!password.equals(confirmation)) {
-            confirmInput.setError("The passwords do not match.");
-            confirmInput.requestFocus();
+            Toast.makeText(this, "The passwords do not match.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!meetsLengthRequirement) {
+            Toast.makeText(this, "Passwords must be at least 8 characters long.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!meetsCharacterRequirement) {
+            Toast.makeText(this, "Passwords must include a special character.", Toast.LENGTH_SHORT).show();
             return;
         }
         if (!new PokeVaultData(this).createUser(username, password)) {
